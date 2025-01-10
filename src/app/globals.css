@@ -1,3 +1,49 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* Enhanced Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+    /* Slightly wider for an elegant look */
+}
+
+::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, #F8F5F1, #E3D5CA);
+    /* Gradient for the track */
+    border-radius: 12px;
+    /* Smooth rounded corners */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow for depth */
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #463F3A, #5D5652);
+    /* Gradient thumb */
+    border-radius: 12px;
+    /* Rounded thumb */
+    border: 3px solid #F8F5F1;
+    /* Space between thumb and track */
+    transition: background 0.3s, box-shadow 0.3s;
+    /* Smooth transition for interactivity */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5D5652, #8A817C);
+    /* Color shift on hover */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    /* Shadow for hover effect */
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #8A817C;
+    /* Solid color for active state */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    /* Enhanced shadow on active state */
+}
+
+::-webkit-scrollbar-corner {
+    background: #F5EBE0;
+    /* Match background for seamless look */
+}

@@ -2,7 +2,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import {
+  Heart,
+  LogOut,
+  Menu,
+  Package,
+  Search,
+  Settings,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MobileMenuProps {
@@ -33,10 +43,26 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   };
 
   const navItems = [
-    { href: "/watches", label: "Watches" },
-    { href: "/clothes", label: "Clothes" },
-    { href: "/shoes", label: "Shoes" },
-    { href: "/accessories", label: "Accessories" },
+    {
+      href: "/designers",
+      label: "Designers",
+    },
+    {
+      href: "/new-arrivals",
+      label: "New Arrivals",
+    },
+    {
+      href: "/men",
+      label: "Men",
+    },
+    {
+      href: "/women",
+      label: "Women",
+    },
+    {
+      href: "/sale",
+      label: "Sale",
+    },
   ];
 
   return (
@@ -102,6 +128,72 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         </>
       )}
     </AnimatePresence>
+  );
+};
+
+const ProfileMenu = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const menuItems = [
+    { icon: <User size={16} />, label: "My Profile", href: "/profile" },
+    { icon: <Heart size={16} />, label: "Wishlist", href: "/wishlist" },
+    { icon: <Package size={16} />, label: "Orders", href: "/orders" },
+    { icon: <Settings size={16} />, label: "Settings", href: "/settings" },
+    { icon: <LogOut size={16} />, label: "Sign Out", href: "/signout" },
+  ];
+
+  const containerVariants = {
+    closed: {
+      opacity: 0,
+      y: 10,
+      transition: { duration: 0.2 },
+    },
+    open: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3 },
+    },
+  };
+
+  return (
+    <motion.div
+      className="relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="p-2 hover:bg-surface-dark rounded-md"
+      >
+        <User size={20} />
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            variants={containerVariants}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            className="absolute top-full right-0 w-56 mt-2 z-50"
+          >
+            <div className="bg-background rounded-md shadow-lg ring-1 ring-black ring-opacity-5 py-1">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center px-4 py-2 text-sm text-primary hover:bg-surface-dark hover:text-accent transition-colors"
+                >
+                  <span className="mr-3 text-primary">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
@@ -221,9 +313,182 @@ const Dropdown = ({ href, label, isActive, subItems }: DropdownProps) => {
   );
 };
 
+const SearchOverlay = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+
+  // Example search suggestions
+  const suggestions = [
+    "New Arrivals",
+    "Best Sellers",
+    "Louis Vuitton Bags",
+    "Gucci Shoes",
+    "Dior Accessories",
+  ];
+
+  // Example popular searches
+  const popularSearches = [
+    "Designer Bags",
+    "Summer Collection",
+    "Luxury Watches",
+    "Men's Sneakers",
+  ];
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // Here you would typically make an API call to get search results
+    // For now, we'll just filter suggestions
+    const filtered = suggestions.filter((item) =>
+      item.toLowerCase().includes(query.toLowerCase())
+    );
+    setSearchResults(filtered);
+  };
+
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Overlay Background */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-50"
+            onClick={onClose}
+          />
+
+          {/* Search Container */}
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed inset-x-0 top-0 bg-background z-50 shadow-lg"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              {/* Search Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex-1 flex items-center">
+                  <Search className="w-5 h-5 text-primary" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    placeholder="Search for products, brands, and more..."
+                    className="flex-1 ml-3 text-lg bg-transparent border-none outline-none placeholder:text-primary/50"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-surface-dark rounded-md"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Search Content */}
+              <div className="space-y-6">
+                {searchQuery ? (
+                  // Search Results
+                  <div className="space-y-4">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((result, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            href={`/search?q=${encodeURIComponent(result)}`}
+                            className="flex items-center space-x-3 p-2 hover:bg-surface-dark rounded-md"
+                            onClick={onClose}
+                          >
+                            <Search className="w-4 h-4 text-primary/50" />
+                            <span>{result}</span>
+                          </Link>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <p className="text-primary/50">
+                        No results found for &quot;{searchQuery}&quot;
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  // Default Content
+                  <>
+                    {/* Popular Searches */}
+                    <div>
+                      <h3 className="text-sm font-medium text-primary/50 mb-3">
+                        Popular Searches
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {popularSearches.map((search, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSearch(search)}
+                            className="px-3 py-1 bg-surface-dark rounded-full text-sm hover:bg-accent hover:text-white transition-colors"
+                          >
+                            {search}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div>
+                      <h3 className="text-sm font-medium text-primary/50 mb-3">
+                        Quick Links
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {suggestions.map((suggestion, index) => (
+                          <Link
+                            key={index}
+                            href={`/search?q=${encodeURIComponent(suggestion)}`}
+                            className="text-sm hover:text-accent transition-colors"
+                            onClick={onClose}
+                          >
+                            {suggestion}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -297,9 +562,9 @@ const Header = () => {
         }`}
       >
         {/* Designer Brand Banner */}
-        <div className="hidden md:block bg-primary text-background text-center py-2 text-sm">
+        {/* <div className="hidden md:block bg-primary text-background text-center py-2 text-sm">
           New Season Collections: Gucci, Louis Vuitton, Dior & More
-        </div>
+        </div> */}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
@@ -318,7 +583,7 @@ const Header = () => {
               <Link href="/" className="inline-block">
                 <motion.div
                   className="space-y-1"
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
                   <div className="h-px bg-accent w-32" />
@@ -342,31 +607,46 @@ const Header = () => {
             </nav>
 
             {/* Right side icons stay the same */}
+            {/* Right side icons */}
             <div className="flex items-center space-x-4">
-              {[
-                { icon: <Search size={20} />, label: "Search" },
-                { icon: <User size={20} />, label: "Account" },
-                { icon: <ShoppingBag size={20} />, label: "Cart", badge: "0" },
-              ].map((item) => (
-                <motion.button
-                  key={item.label}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="p-2 hover:bg-surface-dark rounded-md relative"
-                >
-                  {item.icon}
-                  {item.badge && (
-                    <span className="absolute -top-1 -right-1 bg-accent text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
-                      {item.badge}
-                    </span>
-                  )}
-                </motion.button>
-              ))}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 hover:bg-surface-dark rounded-md"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search size={20} />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 hover:bg-surface-dark rounded-md"
+              >
+                <Heart size={20} />
+              </motion.button>
+
+              <ProfileMenu />
+
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 hover:bg-surface-dark rounded-md relative"
+              >
+                <ShoppingBag size={20} />
+                <span className="absolute -top-1 -right-1 bg-accent text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
+                  0
+                </span>
+              </motion.button>
             </div>
           </div>
         </div>
+        <div className="h-[1px] relative bottom-0 bg-secondary" />
       </header>
-
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
