@@ -28,7 +28,7 @@ const lato = Lato({
 export const metadata: Metadata = {
   title: "VALIDÉ | Luxury Fashion & Accessories",
   description:
-    "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping. Shop designer brands, watches, and exclusive collections.",
+    "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping.",
   keywords:
     "VALIDÉ, luxury fashion, designer watches, premium accessories, luxury shopping, designer brands, high-end fashion, luxury accessories, designer clothing, luxury boutique",
   authors: [{ name: "VALIDÉ Luxury" }],
@@ -48,11 +48,11 @@ export const metadata: Metadata = {
     url: "https://valideluxury.vercel.app",
     title: "VALIDÉ | Luxury Fashion & Accessories",
     description:
-      "Experience curated luxury at VALIDÉ. Shop designer fashion, watches, and premium accessories with worldwide shipping.",
+      "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping.",
     siteName: "VALIDÉ",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/favicon.ico",
         width: 1200,
         height: 630,
         alt: "VALIDÉ Luxury Shopping - Premium Fashion & Accessories",
@@ -63,8 +63,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VALIDÉ | Luxury Fashion & Accessories",
     description:
-      "Experience curated luxury at VALIDÉ. Premium fashion & accessories.",
-    images: ["/og-image.jpg"],
+      "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping.",
+    images: ["/favicon.ico"],
     creator: "@valideluxury",
   },
   icons: {
