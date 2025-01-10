@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Optimize crawling
+Crawl-delay: 10
+
+# Prevent crawling of search results
+Disallow: /search
+Disallow: /api/*
+Disallow: /*?query=*
+
+# Allow important directories explicitly
+Allow: /men
+Allow: /women
+Allow: /designers
+Allow: /new-arrivals
+Allow: /sale
+Allow: /about
+Allow: /contact
+
+# Sitemap
+Sitemap: https://valideluxury.vercel.app/sitemap.xml
+
+# Host
+Host: https://valideluxury.vercel.app

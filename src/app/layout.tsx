@@ -28,33 +28,54 @@ const lato = Lato({
 export const metadata: Metadata = {
   title: "VALIDÉ | Luxury Fashion & Accessories",
   description:
-    "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping.",
+    "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ. Experience premium shopping with worldwide shipping. Shop designer brands, watches, and exclusive collections.",
   keywords:
-    "luxury fashion, designer watches, premium accessories, luxury shopping, VALIDÉ",
-  authors: [{ name: "VALIDÉ" }],
-  metadataBase: new URL("https://valide.com"),
+    "VALIDÉ, luxury fashion, designer watches, premium accessories, luxury shopping, designer brands, high-end fashion, luxury accessories, designer clothing, luxury boutique",
+  authors: [{ name: "VALIDÉ Luxury" }],
+  metadataBase: new URL("https://valideluxury.vercel.app"),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     type: "website",
+    url: "https://valideluxury.vercel.app",
     title: "VALIDÉ | Luxury Fashion & Accessories",
-    description: "Experience curated luxury at VALIDÉ",
+    description:
+      "Experience curated luxury at VALIDÉ. Shop designer fashion, watches, and premium accessories with worldwide shipping.",
     siteName: "VALIDÉ",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "VALIDÉ Luxury Shopping",
+        alt: "VALIDÉ Luxury Shopping - Premium Fashion & Accessories",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "VALIDÉ | Luxury Fashion & Accessories",
-    description: "Experience curated luxury at VALIDÉ",
+    description:
+      "Experience curated luxury at VALIDÉ. Premium fashion & accessories.",
     images: ["/og-image.jpg"],
+    creator: "@valideluxury",
   },
   icons: {
     icon: "/favicon.ico",
+  },
+  manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "https://valideluxury.vercel.app",
+  },
+  verification: {
+    google: "lkDU4-oSrF6pCcKpUha24J3mLWYp9eOZsmQtyhtBCpo", // Add this after setting up Google Search Console
   },
 };
 

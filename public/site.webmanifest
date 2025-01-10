@@ -1,0 +1,14 @@
+{
+  "name": "VALIDÉ Luxury Fashion",
+  "short_name": "VALIDÉ",
+  "description": "Discover curated luxury fashion, timepieces, and accessories at VALIDÉ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#C9AE7C",
+  "orientation": "portrait",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["shopping", "lifestyle", "fashion"],
+  "prefer_related_applications": false
+}
