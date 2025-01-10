@@ -3,6 +3,7 @@ import { Playfair_Display, Montserrat, Lato } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import LenisProviders from "@/components/Lenisproviders";
+import Footer from "@/components/Footer";
 
 // Playfair Display for headlines and luxury elements
 const playfair = Playfair_Display({
@@ -95,6 +96,7 @@ export default function RootLayout({
         <LenisProviders>
           <main className="min-h-screen pt-20">{children}</main>
         </LenisProviders>
+        <Footer />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const NextConfig = {
+  transpilePackages: ['gsap'],
 };
 
-export default nextConfig;
+export default NextConfig;

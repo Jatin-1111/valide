@@ -139,7 +139,7 @@ const ProfileMenu = () => {
     { icon: <Heart size={16} />, label: "Wishlist", href: "/wishlist" },
     { icon: <Package size={16} />, label: "Orders", href: "/orders" },
     { icon: <Settings size={16} />, label: "Settings", href: "/settings" },
-    { icon: <LogOut size={16} />, label: "Sign Out", href: "/signout" },
+    { icon: <LogOut size={16} />, label: "Login", href: "/login" },
   ];
 
   const containerVariants = {
