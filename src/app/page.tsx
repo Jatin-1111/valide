@@ -1,6 +1,8 @@
+import DesignerSpotlight from "@/components/DesignerSpotlight";
 import FeaturedCategories from "@/components/Featured-Categories";
 import HeroSection from "@/components/HeroSection";
 import NewArrivals from "@/components/NewArrivals";
+import TrendingProducts from "@/components/TrendingProducts";
 // import Image from "next/image";
 
 interface Product {
@@ -61,6 +63,8 @@ export default function Home() {
       <HeroSection />
       <FeaturedCategories />
       <NewArrivals products={exampleProducts} />
+      <DesignerSpotlight />
+      <TrendingProducts />
     </div>
   );
 }

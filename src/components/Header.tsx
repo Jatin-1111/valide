@@ -507,11 +507,10 @@ const Header = () => {
       label: "Designers",
       subItems: [
         "Louis Vuitton",
-        "Gucci",
-        "Dior",
+        "Tiffany & Co.",
+        "Cartier",
         "Prada",
-        "Hermès",
-        "Balenciaga",
+        "Tom Ford",
       ],
     },
     {
