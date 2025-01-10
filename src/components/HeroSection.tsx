@@ -37,7 +37,7 @@ const HeroSection = () => {
         </motion.div>
 
         {/* Headline */}
-        <motion.h1
+        <motion.h2
           className="font-playfair text-5xl sm:text-6xl lg:text-7xl font-bold text-primary leading-tight mb-6"
           {...fadeIn}
           transition={{ delay: 0.4 }}
@@ -46,7 +46,7 @@ const HeroSection = () => {
           <span className="block font-montserrat text-3xl sm:text-4xl lg:text-5xl text-secondary/80 mt-4 font-semibold">
             With Timeless Elegance
           </span>
-        </motion.h1>
+        </motion.h2>
 
         {/* Subheading */}
         <motion.p
