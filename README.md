@@ -1,6 +1,6 @@
-flowchart TD
-    Start([Project Initiation]) --> Planning
-    
+
+```mermaid
+graph TD
     subgraph Planning [Planning Phase]
         A1[Domain & Hosting Setup] --> A2[Tech Stack Selection]
         A2 --> A3[Database Schema Design]
@@ -63,6 +63,7 @@ flowchart TD
 
     style Start fill:#f5ebe0,stroke:#463f3a
     style Deploy fill:#f5ebe0,stroke:#463f3a
-    
+
     classDef phase fill:#d5bdaf,stroke:#463f3a
     class Planning,Setup,Frontend,Backend,Additional,Testing,Launch phase
+```
