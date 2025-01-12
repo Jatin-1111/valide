@@ -148,7 +148,7 @@ const ProfileMenu = () => {
           return;
         }
 
-        const response = await fetch("http://localhost:5000/api/check-auth", {
+        const response = await fetch("http://vercel-backend.vercel.app/api/check-auth", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -179,7 +179,7 @@ const ProfileMenu = () => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/logout", {
+      const response = await fetch("http://vercel-backend.vercel.app/api/logout", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
