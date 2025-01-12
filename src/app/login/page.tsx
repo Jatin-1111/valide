@@ -70,7 +70,7 @@ const AuthPage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/${isLogin ? "login" : "register"}`,
+        `http://vercel-backend.vercel.app/api/${isLogin ? "login" : "register"}`,
         {
           method: "POST",
           headers: {
