@@ -7,8 +7,6 @@ import {
   faFacebookF,
   faTwitter,
   faYoutube,
-  faPinterestP,
-  faTiktok,
 } from "@fortawesome/free-brands-svg-icons";
 import Image from "next/image";
 
@@ -26,8 +24,6 @@ const Footer = () => {
     { icon: faFacebookF, href: "https://facebook.com", label: "Facebook" },
     { icon: faTwitter, href: "https://twitter.com", label: "Twitter" },
     { icon: faYoutube, href: "https://youtube.com", label: "YouTube" },
-    { icon: faPinterestP, href: "https://pinterest.com", label: "Pinterest" },
-    { icon: faTiktok, href: "https://tiktok.com", label: "TikTok" },
   ];
 
   return (

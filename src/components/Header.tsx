@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Heart,
+  LogIn,
   LogOut,
   Menu,
   Package,
@@ -133,14 +134,88 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
 const ProfileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  const menuItems = [
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setIsLoggedIn(false);
+          return;
+        }
+
+        const response = await fetch("http://localhost:5000/api/check-auth", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          localStorage.removeItem("token"); // Clear invalid token
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setIsLoggedIn(false);
+        localStorage.removeItem("token");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/logout", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+        window.location.href = "/"; // This will both redirect and reload
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const authenticatedMenuItems = [
     { icon: <User size={16} />, label: "My Profile", href: "/profile" },
     { icon: <Heart size={16} />, label: "Wishlist", href: "/wishlist" },
     { icon: <Package size={16} />, label: "Orders", href: "/orders" },
     { icon: <Settings size={16} />, label: "Settings", href: "/settings" },
-    { icon: <LogOut size={16} />, label: "Login", href: "/login" },
+    {
+      icon: <LogOut size={16} />,
+      label: "Logout",
+      onClick: handleLogout,
+      className: "text-red-600 hover:text-red-700",
+    },
   ];
+
+  const unauthenticatedMenuItems = [
+    { icon: <LogIn size={16} />, label: "Login", href: "/login" },
+  ];
+
+  const menuItems = isLoggedIn
+    ? authenticatedMenuItems
+    : unauthenticatedMenuItems;
 
   const containerVariants = {
     closed: {
@@ -179,16 +254,31 @@ const ProfileMenu = () => {
             className="absolute top-full right-0 w-56 mt-2 z-50"
           >
             <div className="bg-background rounded-md shadow-lg ring-1 ring-black ring-opacity-5 py-1">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center px-4 py-2 text-sm text-primary hover:bg-surface-dark hover:text-accent transition-colors"
-                >
-                  <span className="mr-3 text-primary">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
+              {menuItems.map((item) =>
+                item.onClick ? (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className={`flex items-center px-4 py-2 text-sm text-primary hover:bg-surface-dark hover:text-accent transition-colors w-full ${
+                      item.className || ""
+                    }`}
+                  >
+                    <span className="mr-3 text-primary">{item.icon}</span>
+                    {item.label}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`flex items-center px-4 py-2 text-sm text-primary hover:bg-surface-dark hover:text-accent transition-colors ${
+                      item.className || ""
+                    }`}
+                  >
+                    <span className="mr-3 text-primary">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )
+              )}
             </div>
           </motion.div>
         )}
@@ -605,9 +695,8 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Right side icons stay the same */}
             {/* Right side icons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}

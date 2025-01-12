@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import LenisProviders from "@/components/Lenisproviders";
 import Footer from "@/components/Footer";
+import { ToastContainer } from "react-toastify";
 
 // Playfair Display for headlines and luxury elements
 const playfair = Playfair_Display({
@@ -94,7 +95,21 @@ export default function RootLayout({
       <body className="bg-background text-primary antialiased">
         <Header />
         <LenisProviders>
-          <main className="min-h-screen pt-20">{children}</main>
+          <main className="min-h-screen pt-20">
+            {children}
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </main>
         </LenisProviders>
         <Footer />
       </body>

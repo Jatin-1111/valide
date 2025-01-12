@@ -2,51 +2,50 @@ import type { Config } from "tailwindcss";
 
 export default {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    // Next.js specific paths
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    // Exclude node_modules explicitly
+    "!./src/**/node_modules/**",
   ],
   theme: {
     extend: {
       colors: {
-        // Main brand colors
-        primary: "#463F3A",     // Deep Charcoal - Primary text and elements
-        accent: "#C9AE7C",      // Antique Gold - Accent elements and lines
-        background: "#F5EBE0",  // Soft White - Background color
-        secondary: "#8A817C",   // Warm Gray - Secondary text and elements
-        
-        // Additional shades
-        'primary-light': "#5D5652",    // Lighter version of primary
-        'accent-light': "#D4BF97",     // Lighter gold for hover states
-        'accent-dark': "#B89B69",      // Darker gold for active states
-        
-        // Surface colors
+        primary: {
+          DEFAULT: "#463F3A",
+          light: "#5D5652"
+        },
+        accent: {
+          DEFAULT: "#C9AE7C",
+          light: "#D4BF97",
+          dark: "#B89B69"
+        },
+        background: {
+          DEFAULT: "#F5EBE0",
+        },
+        secondary: "#8A817C",
         surface: {
-          light: "#FFFFFF",      // Pure white for cards
-          DEFAULT: "#F8F5F1",    // Default surface color
-          dark: "#E3D5CA",       // Darker surface for contrast
+          light: "#FFFFFF",
+          DEFAULT: "#F8F5F1",
+          dark: "#E3D5CA",
         },
-
-        // Text colors
         text: {
-          primary: "#463F3A",    // Primary text color
-          secondary: "#8A817C",  // Secondary text color
-          light: "#D5BDAF",      // Light text for dark backgrounds
+          primary: "#463F3A",
+          secondary: "#8A817C",
+          light: "#D5BDAF",
         },
-
-        // State colors
         state: {
-          success: "#4A5D4A",    // Success state in brand style
-          error: "#8B4A4A",      // Error state in brand style
-          warning: "#8B7E4A",    // Warning state in brand style
+          success: "#4A5D4A",
+          error: "#8B4A4A",
+          warning: "#8B7E4A",
         }
       },
-      // You might also want to add custom spacing, typography, or other theme extensions
       fontFamily: {
-        sans: ['var(--font-montserrat)', 'sans-serif'],    // For regular text
-        serif: ['var(--font-playfair)', 'serif'],          // For headings
+        sans: ['var(--font-montserrat)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'serif'],
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require("tailwindcss-animate") // If you need animations
+  ],
 } satisfies Config;

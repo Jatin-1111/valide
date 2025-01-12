@@ -2,6 +2,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, User, Phone } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,10 +16,107 @@ const AuthPage = () => {
     name: "",
     mobile: "",
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  interface FormErrors {
+    name?: string;
+    email?: string;
+    password?: string;
+    mobile?: string;
+    submit?: string;
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    setIsLoading(true);
+
+    // Reset previous errors
+    setFormErrors({});
+    const errors: FormErrors = {};
+
+    // Only validate name and mobile if not in login mode
+    if (!isLogin) {
+      if (!formData.name || formData.name.trim().length < 3) {
+        errors.name = "Name must be at least 3 characters";
+      }
+
+      const phoneRegex = /^\d{10}$/;
+      if (
+        !formData.mobile ||
+        !phoneRegex.test(formData.mobile.replace(/\D/g, ""))
+      ) {
+        errors.mobile = "Please enter a valid 10-digit phone number";
+      }
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    // Password validation
+    if (!formData.password || formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/${isLogin ? "login" : "register"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: formData.name?.trim(),
+            email: formData.email.trim(),
+            password: formData.password,
+            phone: formData.mobile?.replace(/\D/g, ""),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Authentication failed");
+      }
+
+      /// Store token in localStorage
+      if (data.token) {
+        try {
+          localStorage.setItem("token", data.token);
+          toast.success(
+            isLogin ? "Welcome back!" : "Account created successfully!"
+          );
+
+          // First navigate
+          router.push("/");
+          // Give a slight delay before reload to allow navigation to complete
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } catch (error) {
+          console.error("Failed to store token:", error);
+          toast.error("Failed to store authentication data");
+        }
+      }
+    } catch (error: any) {
+      console.error("Authentication error:", error);
+      toast.error(error.message);
+      setFormErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,7 +263,11 @@ const AuthPage = () => {
                                   name="name"
                                   value={formData.name}
                                   onChange={handleInputChange}
-                                  className="w-full bg-white/80 border border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300"
+                                  className={`w-full bg-white/80 border ${
+                                    formErrors.name
+                                      ? "border-red-500"
+                                      : "border-accent/20"
+                                  } rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
                                   placeholder="Enter your full name"
                                   required
                                 />
@@ -171,6 +276,15 @@ const AuthPage = () => {
                                   size={18}
                                 />
                               </div>
+                              {formErrors.name && (
+                                <motion.p
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="text-red-500 text-sm mt-1"
+                                >
+                                  {formErrors.name}
+                                </motion.p>
+                              )}
                             </div>
 
                             <div>
@@ -183,7 +297,11 @@ const AuthPage = () => {
                                   name="mobile"
                                   value={formData.mobile}
                                   onChange={handleInputChange}
-                                  className="w-full bg-white/80 border border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300"
+                                  className={`w-full bg-white/80 border ${
+                                    formErrors.mobile
+                                      ? "border-red-500"
+                                      : "border-accent/20"
+                                  } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
                                   placeholder="XXX-XXX-XXXX"
                                   pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                                   required
@@ -193,6 +311,15 @@ const AuthPage = () => {
                                   size={18}
                                 />
                               </div>
+                              {formErrors.mobile && (
+                                <motion.p
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="text-red-500 text-sm mt-1"
+                                >
+                                  {formErrors.mobile}
+                                </motion.p>
+                              )}
                             </div>
                           </div>
                         </motion.div>
@@ -212,7 +339,11 @@ const AuthPage = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
-                            className="w-full bg-white/80 border border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300"
+                            className={`w-full bg-white/80 border ${
+                              formErrors.email
+                                ? "border-red-500"
+                                : "border-accent/20"
+                            } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
                             placeholder="Enter your email"
                             required
                           />
@@ -221,6 +352,15 @@ const AuthPage = () => {
                             size={18}
                           />
                         </div>
+                        {formErrors.email && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-red-500 text-sm mt-1"
+                          >
+                            {formErrors.email}
+                          </motion.p>
+                        )}
                       </motion.div>
 
                       <motion.div
@@ -237,7 +377,11 @@ const AuthPage = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            className="w-full bg-white/80 border border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300"
+                            className={`w-full bg-white/80 border  ${
+                              formErrors.password
+                                ? "border-red-500"
+                                : "border-accent/20"
+                            } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
                             placeholder="Enter your password"
                             required
                           />
@@ -253,6 +397,15 @@ const AuthPage = () => {
                             )}
                           </button>
                         </div>
+                        {formErrors.password && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-red-500 text-sm mt-1"
+                          >
+                            {formErrors.password}
+                          </motion.p>
+                        )}
                       </motion.div>
 
                       {isLogin && (
@@ -273,11 +426,23 @@ const AuthPage = () => {
 
                       <motion.button
                         type="submit"
-                        className="w-full bg-accent hover:bg-accent-dark text-white font-montserrat py-3 rounded-lg transition-all duration-300"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        disabled={isLoading}
+                        className={`w-full bg-accent hover:bg-accent-dark text-white font-montserrat py-3 rounded-lg transition-all duration-300 ${
+                          isLoading ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
+                        whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                        whileTap={{ scale: isLoading ? 1 : 0.98 }}
                       >
-                        {isLogin ? "Sign In" : "Create Account"}
+                        {isLoading ? (
+                          <div className="flex items-center justify-center">
+                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                            {isLogin ? "Signing In..." : "Creating Account..."}
+                          </div>
+                        ) : isLogin ? (
+                          "Sign In"
+                        ) : (
+                          "Create Account"
+                        )}
                       </motion.button>
 
                       <motion.div
