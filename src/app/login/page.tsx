@@ -28,6 +28,14 @@ const AuthPage = () => {
     submit?: string;
   }
 
+  interface FormErrors {
+    name?: string;
+    email?: string;
+    password?: string;
+    mobile?: string;
+    submit?: string;
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -69,29 +77,46 @@ const AuthPage = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://vercel-backend.vercel.app/api/${isLogin ? "login" : "register"}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: formData.name?.trim(),
-            email: formData.email.trim(),
-            password: formData.password,
-            phone: formData.mobile?.replace(/\D/g, ""),
-          }),
-        }
-      );
+      // Use the full URL of your deployed backend
+      const API_URL = "https://validebackend.vercel.app/api";
+      const endpoint = isLogin ? "login" : "register";
 
-      const data = await response.json();
+      const response = await fetch(`${API_URL}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Add CORS headers
+          Accept: "application/json",
+        },
+        // Enable credentials if your backend requires them
+        credentials: "include",
+        body: JSON.stringify({
+          username: formData.name?.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          phone: formData.mobile?.replace(/\D/g, ""),
+        }),
+      });
+
+      // Log the raw response text first
+      const rawText = await response.text();
+      console.log("Raw server response:", rawText);
+
+      // Then try to parse it
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseError) {
+        console.error("Parse error:", parseError);
+        console.error("Response that failed to parse:", rawText);
+        throw new Error("Server sent invalid JSON response");
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Authentication failed");
       }
 
-      /// Store token in localStorage
+      // Store token in localStorage
       if (data.token) {
         try {
           localStorage.setItem("token", data.token);
@@ -110,10 +135,20 @@ const AuthPage = () => {
           toast.error("Failed to store authentication data");
         }
       }
-    } catch (error: any) {
-      console.error("Authentication error:", error);
-      toast.error(error.message);
-      setFormErrors({ submit: error.message });
+    } catch (error: unknown) {
+      // Enhanced error logging
+      console.error("Full error object:", error);
+
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+        toast.error(error.message || "An unexpected error occurred");
+        setFormErrors({ submit: error.message });
+      } else {
+        console.error("Error message:", String(error));
+        toast.error("An unexpected error occurred");
+        setFormErrors({ submit: "An unexpected error occurred" });
+      }
     } finally {
       setIsLoading(false);
     }

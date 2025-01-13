@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Heart,
   LogIn,
@@ -132,11 +132,19 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   );
 };
 
+interface MenuItem {
+  icon: React.ReactElement;
+  label: string;
+  href?: string;
+  onClick?: () => Promise<void>;
+  className?: string;
+}
+
 const ProfileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -148,13 +156,16 @@ const ProfileMenu = () => {
           return;
         }
 
-        const response = await fetch("http://vercel-backend.vercel.app/api/check-auth", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://validebackend.vercel.app/api/check-auth",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const data = await response.json();
 
@@ -179,12 +190,15 @@ const ProfileMenu = () => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://vercel-backend.vercel.app/api/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://validebackend.vercel.app/api/logout",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         localStorage.removeItem("token");
@@ -230,6 +244,20 @@ const ProfileMenu = () => {
     },
   };
 
+  if (isLoading) {
+    return (
+      <motion.div className="relative">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="p-2 hover:bg-surface-dark rounded-md opacity-50"
+        >
+          <User size={20} />
+        </motion.button>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       className="relative"
@@ -254,7 +282,7 @@ const ProfileMenu = () => {
             className="absolute top-full right-0 w-56 mt-2 z-50"
           >
             <div className="bg-background rounded-md shadow-lg ring-1 ring-black ring-opacity-5 py-1">
-              {menuItems.map((item) =>
+              {menuItems.map((item: MenuItem) =>
                 item.onClick ? (
                   <button
                     key={item.label}
@@ -269,7 +297,7 @@ const ProfileMenu = () => {
                 ) : (
                   <Link
                     key={item.label}
-                    href={item.href}
+                    href={item.href || "#"}
                     className={`flex items-center px-4 py-2 text-sm text-primary hover:bg-surface-dark hover:text-accent transition-colors ${
                       item.className || ""
                     }`}
