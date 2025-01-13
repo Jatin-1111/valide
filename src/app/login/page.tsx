@@ -78,7 +78,7 @@ const AuthPage = () => {
 
     try {
       // Use the full URL of your deployed backend
-      const API_URL = "https://validebackend.vercel.app/api";
+      const API_URL = "https://validebackend.onrender.com/api";
       const endpoint = isLogin ? "login" : "register";
 
       const response = await fetch(`${API_URL}/${endpoint}`, {
