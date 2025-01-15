@@ -18,6 +18,7 @@ interface FormData {
   category: string;
   stock: string;
   specifications: string;
+  images: File[];
 }
 
 interface FormFieldProps {
@@ -61,6 +62,7 @@ const ProductForm: React.FC = () => {
     category: "",
     stock: "",
     specifications: "",
+    images: [],
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormState);
@@ -114,15 +116,21 @@ const ProductForm: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!formData.productName || !formData.price || !formData.category) {
+    if (
+      !formData.brandName ||
+      !formData.productName ||
+      !formData.price ||
+      !formData.category ||
+      !formData.stock
+    ) {
       setError("Please fill in all required fields");
       return false;
     }
 
-    // if (images.length === 0) {
-    //   setError("Please upload at least one product image");
-    //   return false;
-    // }
+    if (images.length === 0) {
+      setError("Please upload at least one product image");
+      return false;
+    }
 
     return true;
   };
@@ -150,29 +158,36 @@ const ProductForm: React.FC = () => {
       return;
     }
 
-    // Prepare form data
-    const productData = {
-      brandName: formData.brandName.toLowerCase().trim(),
-      productName: formData.productName.trim(),
-      description: formData.description.trim(),
-      price: Number(formData.price),
-      category: formData.category.trim(),
-      stock: Number(formData.stock),
-      specification: formData.specifications?.trim(),
-    };
-
-    // API request configuration
-    const requestConfig = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(productData),
-    };
-
     try {
-      const response = await fetch(API_URL, requestConfig);
+      // Create FormData object with a different name to avoid conflict
+      const formDataToSend = new FormData();
+
+      // Append form fields
+      formDataToSend.append(
+        "brandName",
+        formData.brandName.toLowerCase().trim()
+      );
+      formDataToSend.append("productName", formData.productName.trim());
+      formDataToSend.append("description", formData.description.trim());
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("category", formData.category.trim());
+      formDataToSend.append("stock", formData.stock);
+      formDataToSend.append(
+        "specification",
+        formData.specifications?.trim() || ""
+      );
+
+      // Append each image
+      images.forEach((image) => {
+        formDataToSend.append(`images`, image); // Keep the field name consistent
+      });
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: formDataToSend,
+        // Let the browser set the Content-Type header for FormData
+      });
+
       const data: ApiResponse = await response.json();
 
       if (!response.ok) {
@@ -183,8 +198,6 @@ const ProductForm: React.FC = () => {
       setSuccess(true);
       setFormData(initialFormState);
       setImages([]);
-
-      // Optional: Show success message
       toast?.success("Product added successfully!");
     } catch (error) {
       // Error handling

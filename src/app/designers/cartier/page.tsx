@@ -15,7 +15,7 @@ interface Product {
   category: string;
   stock: number;
   specification?: string;
-  image?: string;
+  images: string[];
 }
 
 const CartierPage = () => {
@@ -40,6 +40,8 @@ const CartierPage = () => {
       }
 
       const data = await response.json();
+      console.log(data.data);
+
       setProducts(data.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load products");
@@ -217,7 +219,11 @@ const CartierPage = () => {
                 }`}
               >
                 <Image
-                  src={product.image || "/api/placeholder/300/400"}
+                  src={
+                    Array.isArray(product.images) && product.images.length > 0
+                      ? product.images[0]
+                      : "/api/placeholder/300/400"
+                  }
                   alt={product.productName}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
