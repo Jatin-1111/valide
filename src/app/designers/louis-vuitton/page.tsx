@@ -32,7 +32,7 @@ const LVpage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/products/brand/Louis%20Vuitton"
+        "https://validebackend.onrender.com/api/products/brand/Louis%20Vuitton"
       );
 
       if (!response.ok) {

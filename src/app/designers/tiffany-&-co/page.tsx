@@ -31,8 +31,9 @@ const TiffanyPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      const encodedBrand = encodeURIComponent("Tiffany & Co.");
       const response = await fetch(
-        "http://localhost:5000/api/products/brand/Tiffany%20%26%20Co."
+        `https://validebackend.onrender.com/api/products/brand/${encodedBrand.toLowerCase()}`
       );
 
       if (!response.ok) {
@@ -126,9 +127,9 @@ const TiffanyPage = () => {
               Tiffany & Co.
             </h1>
             <p className="font-lato max-w-2xl mx-auto px-4">
-              Since 1837, Tiffany & Co. has been the world&apos;s premier jeweler and
-              America&apos;s house of design, creating extraordinary pieces that turn
-              moments into lasting memories.
+              Since 1837, Tiffany & Co. has been the world&apos;s premier
+              jeweler and America&apos;s house of design, creating extraordinary
+              pieces that turn moments into lasting memories.
             </p>
           </div>
         </div>

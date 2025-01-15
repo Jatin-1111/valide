@@ -32,7 +32,7 @@ const CartierPage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/products/brand/cartier"
+        "https://validebackend.onrender.com/api/products/brand/cartier"
       );
 
       if (!response.ok) {

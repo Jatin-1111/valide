@@ -32,7 +32,7 @@ const TomfordPage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/products/brand/tomford"
+        "https://validebackend.onrender.com/api/products/brand/tomford"
       );
 
       if (!response.ok) {

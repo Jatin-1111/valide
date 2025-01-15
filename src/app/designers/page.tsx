@@ -54,7 +54,6 @@ const DesignersPage = () => {
       image: "/tomford-logo.png",
       featured: true,
     },
-    // Add more designers here
   ];
 
   const categories = ["All", "Luxury", "Jewelry", "Fashion", "Accessories"];
