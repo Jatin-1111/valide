@@ -157,7 +157,7 @@ const ProfileMenu = () => {
         }
 
         const response = await fetch(
-          "https://validebackend.vercel.app/api/check-auth",
+          "https://validebackend.onrender.com/api/check-auth",
           {
             method: "GET",
             headers: {
@@ -191,7 +191,7 @@ const ProfileMenu = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://validebackend.vercel.app/api/logout",
+        "https://validebackend.onrender.com/api/logout",
         {
           method: "POST",
           headers: {
@@ -609,6 +609,8 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
 
+  const isDevelopment = process.env.NEXT_PUBLIC_ENV === "development";
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -673,7 +675,9 @@ const Header = () => {
     <>
       <header
         className={`fixed w-full z-40 transition-all duration-300 ${
-          isScrolled
+          isDevelopment
+            ? "bg-slate-950"
+            : isScrolled
             ? "bg-background/95 backdrop-blur-sm shadow-sm"
             : "bg-background"
         }`}

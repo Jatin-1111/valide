@@ -154,7 +154,7 @@ const DesignerSpotlight = () => {
               {designers[activeIndex].collections.map((collection) => (
                 <div
                   key={collection}
-                  className="text-center p-4 bg-surface-light rounded-lg hover:bg-accent hover:text-surface-light transition-colors duration-300"
+                  className="text-center p-4 bg-surface-dark rounded-lg hover:bg-accent hover:text-surface-light transition-colors duration-300"
                 >
                   <p className="font-montserrat text-sm">
                     {collection}

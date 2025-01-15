@@ -67,7 +67,7 @@ export default function NewArrivals({ products }: NewArrivalsProps) {
               style={{ scrollSnapAlign: "start" }}
             >
               <div className="group relative">
-                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-gray-100">
+                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-surface-dark">
                   <Image
                     src={product.image}
                     alt={product.name}

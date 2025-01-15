@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Eye, X, ShoppingBag, Heart } from "lucide-react";
+import { Eye, X, ShoppingBag, Heart, Share2 } from "lucide-react";
 
 interface Product {
   id: string;
@@ -15,13 +15,13 @@ interface Product {
   stock?: number;
 }
 
-const QuickViewModal = ({ 
-  product, 
-  isOpen, 
-  onClose 
-}: { 
-  product: Product; 
-  isOpen: boolean; 
+const QuickViewModal = ({
+  product,
+  isOpen,
+  onClose,
+}: {
+  product: Product;
+  isOpen: boolean;
   onClose: () => void;
 }) => {
   if (!isOpen) return null;
@@ -101,6 +101,7 @@ const QuickViewModal = ({
 
 const TrendingProducts = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
 
   const products: Product[] = [
     {
@@ -178,7 +179,7 @@ const TrendingProducts = () => {
           </motion.h2>
         </div>
 
-        {/* Products Grid */}
+        {/* Enhanced Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
             <motion.div
@@ -186,28 +187,97 @@ const TrendingProducts = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="group"
+              className="group relative"
+              onMouseEnter={() => setHoveredProduct(product.id)}
+              onMouseLeave={() => setHoveredProduct(null)}
             >
               {/* Product Image */}
-              <div className="relative aspect-[4/5] mb-4">
+              <div className="relative aspect-[4/5] mb-4 overflow-hidden rounded-lg">
                 <Image
                   src={product.image}
                   alt={product.name}
                   fill
-                  className="object-contain rounded-lg"
+                  className="object-contain rounded-lg bg-surface-dark transition-transform duration-700 group-hover:scale-105"
                 />
-                
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
+
+                {/* Enhanced Overlay */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: hoveredProduct === product.id ? 1 : 0,
+                    backdropFilter:
+                      hoveredProduct === product.id ? "blur(2px)" : "blur(0px)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 bg-black/30 rounded-lg"
+                >
+                  {/* Action Buttons Container */}
+                  <div className="absolute inset-0 flex items-center justify-center gap-4">
+                    <motion.button
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: hoveredProduct === product.id ? 1 : 0,
+                        y: hoveredProduct === product.id ? 0 : 20,
+                      }}
+                      transition={{ duration: 0.3, delay: 0 }}
                       onClick={() => setSelectedProduct(product)}
-                      className="bg-surface-light p-4 rounded-full transform -translate-y-10 group-hover:translate-y-0 transition-transform"
+                      className="bg-surface-light p-3 rounded-full hover:bg-primary hover:text-surface-light transition-colors duration-300"
                     >
-                      <Eye className="w-6 h-6 text-primary" />
-                    </button>
+                      <Eye className="w-5 h-5" />
+                    </motion.button>
+
+                    <motion.button
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: hoveredProduct === product.id ? 1 : 0,
+                        y: hoveredProduct === product.id ? 0 : 20,
+                      }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="bg-surface-light p-3 rounded-full hover:bg-primary hover:text-surface-light transition-colors duration-300"
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                    </motion.button>
+
+                    <motion.button
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: hoveredProduct === product.id ? 1 : 0,
+                        y: hoveredProduct === product.id ? 0 : 20,
+                      }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
+                      className="bg-surface-light p-3 rounded-full hover:bg-primary hover:text-surface-light transition-colors duration-300"
+                    >
+                      <Heart className="w-5 h-5" />
+                    </motion.button>
+
+                    <motion.button
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{
+                        opacity: hoveredProduct === product.id ? 1 : 0,
+                        y: hoveredProduct === product.id ? 0 : 20,
+                      }}
+                      transition={{ duration: 0.3, delay: 0.3 }}
+                      className="bg-surface-light p-3 rounded-full hover:bg-primary hover:text-surface-light transition-colors duration-300"
+                    >
+                      <Share2 className="w-5 h-5" />
+                    </motion.button>
                   </div>
-                </div>
+
+                  {/* Product Quick Info */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{
+                      opacity: hoveredProduct === product.id ? 1 : 0,
+                      y: hoveredProduct === product.id ? 0 : 20,
+                    }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                    className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent"
+                  >
+                    <p className="text-surface-light font-montserrat text-sm">
+                      {product.stock} items in stock
+                    </p>
+                  </motion.div>
+                </motion.div>
 
                 {/* Popularity Badge */}
                 <div className="absolute top-4 left-4 bg-surface-light/90 px-3 py-1 rounded-full">
@@ -218,7 +288,7 @@ const TrendingProducts = () => {
                 </div>
               </div>
 
-              {/* Product Info */}
+              {/* Product Info remains the same */}
               <div className="space-y-2">
                 <h3 className="font-playfair text-lg text-primary">
                   {product.name}
@@ -234,7 +304,7 @@ const TrendingProducts = () => {
           ))}
         </div>
 
-        {/* Quick View Modal */}
+        {/* QuickView Modal remains the same */}
         <QuickViewModal
           product={selectedProduct!}
           isOpen={!!selectedProduct}

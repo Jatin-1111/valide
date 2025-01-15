@@ -1,476 +1,412 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Mail, User, Phone } from "lucide-react";
+import { Eye, EyeOff, Mail, User, Phone, Loader2, Shield } from "lucide-react";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const AuthPage = () => {
+// Separate types for better maintainability
+interface FormData {
+  email: string;
+  password: string;
+  name: string;
+  mobile: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  mobile?: string;
+  submit?: string;
+}
+
+// Constants to avoid recreation
+const API_URL = "https://validebackend.onrender.com/api";
+const PHONE_REGEX = /^\d{5}-\d{5}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Enhanced animations
+const animations = {
+  container: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 },
+    },
+  },
+  page: {
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      scale: 0.95,
+      transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+    },
+  },
+  field: {
+    initial: { opacity: 0, x: -20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20 },
+  },
+  wave: {
+    animate: {
+      y: [0, -15, 0],
+      transition: {
+        duration: 2.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatType: "reverse",
+      },
+    },
+  },
+};
+
+const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Use reducer pattern for form state management
+  const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
     name: "",
     mobile: "",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
-  interface FormErrors {
-    name?: string;
-    email?: string;
-    password?: string;
-    mobile?: string;
-    submit?: string;
-  }
+  // Memoized validation functions
+  const validateForm = useCallback(
+    (data: FormData, isLoginMode: boolean): FormErrors => {
+      const errors: FormErrors = {};
 
-  interface FormErrors {
-    name?: string;
-    email?: string;
-    password?: string;
-    mobile?: string;
-    submit?: string;
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Reset previous errors
-    setFormErrors({});
-    const errors: FormErrors = {};
-
-    // Only validate name and mobile if not in login mode
-    if (!isLogin) {
-      if (!formData.name || formData.name.trim().length < 3) {
-        errors.name = "Name must be at least 3 characters";
+      if (!isLoginMode) {
+        if (!data.name?.trim() || data.name.trim().length < 3) {
+          errors.name = "Name must be at least 3 characters";
+        }
+        if (!data.mobile || !PHONE_REGEX.test(data.mobile.replace(/\D/g, ""))) {
+          errors.mobile = "Please enter a valid 10-digit phone number";
+        }
       }
 
-      const phoneRegex = /^\d{10}$/;
-      if (
-        !formData.mobile ||
-        !phoneRegex.test(formData.mobile.replace(/\D/g, ""))
-      ) {
-        errors.mobile = "Please enter a valid 10-digit phone number";
+      if (!data.email || !EMAIL_REGEX.test(data.email)) {
+        errors.email = "Please enter a valid email address";
       }
-    }
+      if (!data.password || data.password.length < 6) {
+        errors.password = "Password must be at least 6 characters";
+      }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email || !emailRegex.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
+      return errors;
+    },
+    []
+  );
 
-    // Password validation
-    if (!formData.password || formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
+  // Memoized form submission handler
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsLoading(true);
+      setFormErrors({});
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      setIsLoading(false);
-      return;
-    }
+      const errors = validateForm(formData, isLogin);
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        setIsLoading(false);
+        return;
+      }
 
-    try {
-      // Use the full URL of your deployed backend
-      const API_URL = "https://validebackend.onrender.com/api";
-      const endpoint = isLogin ? "login" : "register";
-
-      const response = await fetch(`${API_URL}/${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Add CORS headers
-          Accept: "application/json",
-        },
-        // Enable credentials if your backend requires them
-        credentials: "include",
-        body: JSON.stringify({
-          username: formData.name?.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          phone: formData.mobile?.replace(/\D/g, ""),
-        }),
-      });
-
-      // Log the raw response text first
-      const rawText = await response.text();
-      console.log("Raw server response:", rawText);
-
-      // Then try to parse it
-      let data;
       try {
-        data = JSON.parse(rawText);
-      } catch (parseError) {
-        console.error("Parse error:", parseError);
-        console.error("Response that failed to parse:", rawText);
-        throw new Error("Server sent invalid JSON response");
-      }
+        const endpoint = isLogin ? "login" : "register";
+        const response = await fetch(`${API_URL}/${endpoint}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            username: formData.name?.trim(),
+            email: formData.email.trim(),
+            password: formData.password,
+            phone: formData.mobile?.replace(/\D/g, ""),
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(data.message || "Authentication failed");
-      }
+        const data = await response.json();
 
-      // Store token in localStorage
-      if (data.token) {
-        try {
+        if (!response.ok) {
+          throw new Error(data.message || "Authentication failed");
+        }
+
+        if (data.token) {
           localStorage.setItem("token", data.token);
           toast.success(
             isLogin ? "Welcome back!" : "Account created successfully!"
           );
-
-          // First navigate
           router.push("/");
-          // Give a slight delay before reload to allow navigation to complete
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
-        } catch (error) {
-          console.error("Failed to store token:", error);
-          toast.error("Failed to store authentication data");
+          setTimeout(() => window.location.reload(), 100);
         }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
+        toast.error(errorMessage);
+        setFormErrors({ submit: errorMessage });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: unknown) {
-      // Enhanced error logging
-      console.error("Full error object:", error);
+    },
+    [formData, isLogin, router]
+  );
 
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
-        toast.error(error.message || "An unexpected error occurred");
-        setFormErrors({ submit: error.message });
+  // Memoized input change handler
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+
+      if (name === "mobile") {
+        const digits = value.replace(/\D/g, "").slice(0, 10);
+        const formattedValue =
+          digits.length > 0
+            ? digits.length <= 5
+              ? digits
+              : `${digits.slice(0, 5)}-${digits.slice(5)}`
+            : "";
+
+        setFormData((prev) => ({ ...prev, [name]: formattedValue }));
       } else {
-        console.error("Error message:", String(error));
-        toast.error("An unexpected error occurred");
-        setFormErrors({ submit: "An unexpected error occurred" });
+        setFormData((prev) => ({ ...prev, [name]: value }));
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    if (e.target.name === "mobile") {
-      value = value.replace(/\D/g, "");
-      if (value.length > 0) {
-        if (value.length <= 3) {
-          value = value;
-        } else if (value.length <= 6) {
-          value = value.slice(0, 3) + "-" + value.slice(3);
-        } else {
-          value =
-            value.slice(0, 3) +
-            "-" +
-            value.slice(3, 6) +
-            "-" +
-            value.slice(6, 10);
-        }
-      }
-    }
-    setFormData({
-      ...formData,
-      [e.target.name]: value,
-    });
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-      },
     },
-  };
+    []
+  );
 
-  const pageVariants = {
-    initial: { opacity: 0, scale: 0.8 },
-    animate: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1],
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.8,
-      transition: {
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1],
-      },
-    },
-  };
+  // Enhanced input field renderer with animations
+  const renderInput = useCallback(
+    (
+      name: keyof FormData,
+      type: string,
+      label: string,
+      placeholder: string,
+      icon: React.ReactNode
+    ) => (
+      <motion.div
+        variants={animations.field}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="space-y-2"
+      >
+        <label className="block font-montserrat text-sm text-primary/80 font-medium">
+          {label}
+        </label>
+        <div className="relative group">
+          <input
+            type={type}
+            name={name}
+            value={formData[name]}
+            onChange={handleInputChange}
+            className={`
+            w-full bg-white/80 border-2 ${
+              formErrors[name] ? "border-red-500" : "border-accent/20"
+            } rounded-lg px-4 py-3 text-primary placeholder-primary/30
+            focus:border-accent/50 focus:ring-2 focus:ring-accent/20
+            transition-all duration-300 outline-none
+            group-hover:border-accent/40
+          `}
+            placeholder={placeholder}
+            required
+          />
+          <div
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-accent/50
+                      group-hover:text-accent transition-colors duration-300"
+          >
+            {icon}
+          </div>
+        </div>
+        <AnimatePresence mode="wait">
+          {formErrors[name] && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-red-500 text-sm flex items-center gap-2"
+            >
+              <Shield size={14} className="inline" />
+              {formErrors[name]}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    ),
+    [formData, formErrors, handleInputChange]
+  );
 
   return (
-    <div className="min-h-screen bg-[#F5EBE0] relative overflow-hidden">
-      {/* Main Content */}
-      <div className="relative min-h-screen flex items-center justify-center p-3 md:p-6">
-        <motion.div
-          className="w-full max-w-xl"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isLogin ? "login" : "signup"}
-              className="relative"
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
+    <div className="min-h-screen bg-gradient-to-br from-[#F5EBE0] to-[#E8DAD0] flex items-center justify-center p-3 md:p-6">
+      <motion.div
+        className="w-full max-w-xl"
+        variants={animations.container}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isLogin ? "login" : "signup"}
+            variants={animations.page}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="relative"
+          >
+            <div
+              className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden
+                          border border-white/20 relative"
             >
-              {/* Split Design Container */}
-              <div className="bg-white/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg">
-                <div className="grid grid-cols-5">
-                  {/* Side Pattern */}
-                  <div className="col-span-2 bg-accent/10 p-8 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5" />
-                    <motion.div
-                      className="relative z-10"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <h2 className="font-playfair text-3xl md:text-4xl text-primary mb-4">
-                        VALIDÉ
-                      </h2>
-                      <p className="font-montserrat text-primary/80 text-sm">
-                        {isLogin
-                          ? "Welcome back to luxury redefined"
-                          : "Join the exclusive world of luxury"}
-                      </p>
-                    </motion.div>
-                    {/* Decorative lines */}
-                    <motion.div
-                      className="absolute bottom-0 left-0 w-full h-1/2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      {[...Array(5)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="absolute h-px bg-accent/20"
-                          style={{
-                            bottom: `${i * 20}%`,
-                            left: 0,
-                            right: 0,
-                          }}
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{
+              {/* Floating decorative elements */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
+
+              <div className="grid grid-cols-5 relative">
+                {/* Enhanced Side Pattern */}
+                <div className="col-span-2 bg-gradient-to-br from-accent/10 to-accent/5 p-8 relative overflow-hidden">
+                  <motion.div
+                    className="relative z-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <motion.h2 className="font-playfair text-4xl md:text-5xl text-primary mb-4 relative">
+                      VALIDÉ
+                      <span className="absolute -top-1 -right-1 w-full h-full bg-accent/10 blur-sm z-[-1]" />
+                    </motion.h2>
+                    <p className="font-montserrat text-primary/80 text-sm">
+                      {isLogin
+                        ? "Welcome back to luxury redefined"
+                        : "Join the exclusive world of luxury"}
+                    </p>
+                  </motion.div>
+
+                  {/* Enhanced decorative lines */}
+                  <div className="absolute bottom-0 left-0 w-full h-1/2">
+                    {[...Array(5)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute h-px bg-gradient-to-r from-accent/30 via-accent/20 to-transparent"
+                        style={{
+                          bottom: `${i * 20}%`,
+                          left: 0,
+                          right: 0,
+                        }}
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        animate={{
+                          scaleX: 1,
+                          opacity: 1,
+                          transition: {
                             delay: 0.5 + i * 0.1,
                             duration: 1,
                             ease: "easeOut",
-                          }}
-                        />
-                      ))}
-                    </motion.div>
+                          },
+                        }}
+                      />
+                    ))}
                   </div>
+                </div>
 
-                  {/* Form Section */}
-                  <div className="col-span-3 p-8">
-                    <motion.form onSubmit={handleSubmit} className="space-y-6">
+                {/* Enhanced Form Section */}
+                <div className="col-span-3 p-8">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <AnimatePresence mode="wait">
                       {!isLogin && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block font-montserrat text-sm text-primary/80 mb-2">
-                                Full Name
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  name="name"
-                                  value={formData.name}
-                                  onChange={handleInputChange}
-                                  className={`w-full bg-white/80 border ${
-                                    formErrors.name
-                                      ? "border-red-500"
-                                      : "border-accent/20"
-                                  } rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
-                                  placeholder="Enter your full name"
-                                  required
-                                />
-                                <User
-                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-accent/50"
-                                  size={18}
-                                />
-                              </div>
-                              {formErrors.name && (
-                                <motion.p
-                                  initial={{ opacity: 0, y: -10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className="text-red-500 text-sm mt-1"
-                                >
-                                  {formErrors.name}
-                                </motion.p>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block font-montserrat text-sm text-primary/80 mb-2">
-                                Mobile Number
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type="tel"
-                                  name="mobile"
-                                  value={formData.mobile}
-                                  onChange={handleInputChange}
-                                  className={`w-full bg-white/80 border ${
-                                    formErrors.mobile
-                                      ? "border-red-500"
-                                      : "border-accent/20"
-                                  } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
-                                  placeholder="XXX-XXX-XXXX"
-                                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                                  required
-                                />
-                                <Phone
-                                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-accent/50"
-                                  size={18}
-                                />
-                              </div>
-                              {formErrors.mobile && (
-                                <motion.p
-                                  initial={{ opacity: 0, y: -10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className="text-red-500 text-sm mt-1"
-                                >
-                                  {formErrors.mobile}
-                                </motion.p>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
+                        <>
+                          {renderInput(
+                            "name",
+                            "text",
+                            "Full Name",
+                            "Enter your full name",
+                            <User
+                              size={18}
+                              className="group-hover:rotate-12 transition-transform duration-300"
+                            />
+                          )}
+                          {renderInput(
+                            "mobile",
+                            "tel",
+                            "Mobile Number",
+                            "XXXXX-XXXXX",
+                            <Phone
+                              size={18}
+                              className="group-hover:rotate-12 transition-transform duration-300"
+                            />
+                          )}
+                        </>
                       )}
+                    </AnimatePresence>
 
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
+                    {renderInput(
+                      "email",
+                      "email",
+                      "Email Address",
+                      "Enter your email",
+                      <Mail
+                        size={18}
+                        className="group-hover:rotate-12 transition-transform duration-300"
+                      />
+                    )}
+                    {renderInput(
+                      "password",
+                      showPassword ? "text" : "password",
+                      "Password",
+                      "Enter your password",
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="hover:text-accent transition-colors duration-300"
                       >
-                        <label className="block font-montserrat text-sm text-primary/80 mb-2">
-                          Email Address
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className={`w-full bg-white/80 border ${
-                              formErrors.email
-                                ? "border-red-500"
-                                : "border-accent/20"
-                            } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
-                            placeholder="Enter your email"
-                            required
-                          />
-                          <Mail
-                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-accent/50"
+                        {showPassword ? (
+                          <EyeOff
                             size={18}
+                            className="group-hover:rotate-12 transition-transform duration-300"
                           />
-                        </div>
-                        {formErrors.email && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-red-500 text-sm mt-1"
-                          >
-                            {formErrors.email}
-                          </motion.p>
-                        )}
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        <label className="block font-montserrat text-sm text-primary/80 mb-2">
-                          Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className={`w-full bg-white/80 border  ${
-                              formErrors.password
-                                ? "border-red-500"
-                                : "border-accent/20"
-                            } border-accent/20 rounded-lg px-4 py-3 text-primary placeholder-primary/30 focus:border-accent/50 transition-all duration-300`}
-                            placeholder="Enter your password"
-                            required
+                        ) : (
+                          <Eye
+                            size={18}
+                            className="group-hover:rotate-12 transition-transform duration-300"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-accent/50 hover:text-accent transition-colors duration-300"
-                          >
-                            {showPassword ? (
-                              <EyeOff size={18} />
-                            ) : (
-                              <Eye size={18} />
-                            )}
-                          </button>
-                        </div>
-                        {formErrors.password && (
-                          <motion.p
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-red-500 text-sm mt-1"
-                          >
-                            {formErrors.password}
-                          </motion.p>
                         )}
-                      </motion.div>
+                      </button>
+                    )}
 
-                      {isLogin && (
-                        <motion.div
-                          className="text-right"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 }}
-                        >
-                          <button
-                            type="button"
-                            className="font-montserrat text-sm text-accent hover:text-accent-light transition-colors duration-300"
-                          >
-                            Forgot Password?
-                          </button>
-                        </motion.div>
-                      )}
-
-                      <motion.button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`w-full bg-accent hover:bg-accent-dark text-white font-montserrat py-3 rounded-lg transition-all duration-300 ${
-                          isLoading ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
-                        whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                        whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                      >
+                    <motion.button
+                      type="submit"
+                      disabled={isLoading}
+                      className={`
+                        w-full bg-gradient-to-r from-accent to-accent-dark
+                        text-white font-montserrat py-3 rounded-lg
+                        transition-all duration-300 relative overflow-hidden
+                        ${
+                          isLoading
+                            ? "opacity-70 cursor-not-allowed"
+                            : "hover:shadow-lg"
+                        }
+                      `}
+                      whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                      whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                    >
+                      <span className="relative z-10">
                         {isLoading ? (
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             {isLogin ? "Signing In..." : "Creating Account..."}
                           </div>
                         ) : isLogin ? (
@@ -478,35 +414,45 @@ const AuthPage = () => {
                         ) : (
                           "Create Account"
                         )}
-                      </motion.button>
-
+                      </span>
                       <motion.div
-                        className="text-center mt-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
+                        className="absolute inset-0 bg-gradient-to-r from-accent-dark to-accent"
+                        initial={{ x: "100%" }}
+                        whileHover={{ x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </motion.button>
+
+                    <motion.div
+                      className="text-center"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setIsLogin(!isLogin)}
+                        className="text-accent hover:text-accent-dark font-medium 
+                                 transition-colors duration-300 relative group"
                       >
-                        <p className="font-lato text-primary/60">
+                        <span>
                           {isLogin
-                            ? "Don't have an account? "
-                            : "Already have an account? "}
-                          <button
-                            type="button"
-                            onClick={() => setIsLogin(!isLogin)}
-                            className="text-accent hover:text-accent-dark font-medium transition-colors duration-300"
-                          >
-                            {isLogin ? "Sign Up" : "Sign In"}
-                          </button>
-                        </p>
-                      </motion.div>
-                    </motion.form>
-                  </div>
+                            ? "Need an account? Sign Up"
+                            : "Already have an account? Sign In"}
+                        </span>
+                        <span
+                          className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-dark 
+                                     group-hover:w-full transition-all duration-300"
+                        />
+                      </button>
+                    </motion.div>
+                  </form>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-      </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
