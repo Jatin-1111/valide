@@ -5,21 +5,38 @@ import { motion } from "framer-motion";
 import { Grid, Heart, List } from "lucide-react";
 import Image from "next/image";
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   category: string;
-//   price: number;
-//   image: string;
-// }
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+}
 
-const BrandPage = ({ params }: { params: { brandId: string } }) => {
+interface BrandData {
+  id: string;
+  name: string;
+  description: string;
+  backgroundImage: string;
+  logo: string;
+  categories: string[];
+  products: Product[];
+}
+
+interface BrandPageProps {
+  params: {
+    brandId: string;
+  };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+const BrandPage = ({ params }: BrandPageProps) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
 
   // This would come from your API
-  const brandData = {
+  const brandData: BrandData = {
     id: params.brandId,
     name: "Louis Vuitton",
     description:
@@ -51,6 +68,18 @@ const BrandPage = ({ params }: { params: { brandId: string } }) => {
       selectedCategory === "All" || product.category === selectedCategory
   );
 
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-asc":
+        return a.price - b.price;
+      case "price-desc":
+        return b.price - a.price;
+      case "newest":
+      default:
+        return 0; // Assuming products are already in newest-first order
+    }
+  });
+
   return (
     <main className="min-h-screen font-playfair">
       {/* Hero Section */}
@@ -60,18 +89,21 @@ const BrandPage = ({ params }: { params: { brandId: string } }) => {
             src={brandData.backgroundImage}
             alt={brandData.name}
             fill
-            className="w-full h-full object-cover"
+            className="object-cover"
+            priority
           />
           <div className="absolute inset-0 bg-black/30" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
-            <Image
-              src={brandData.logo}
-              alt={`${brandData.name} logo`}
-              fill
-              className="w-32 h-32 mx-auto mb-6 rounded-full bg-white/10 backdrop-blur-sm"
-            />
+            <div className="relative w-32 h-32 mx-auto mb-6">
+              <Image
+                src={brandData.logo}
+                alt={`${brandData.name} logo`}
+                fill
+                className="rounded-full bg-white/10 backdrop-blur-sm object-cover"
+              />
+            </div>
             <h1 className="text-5xl font-playfair tracking-wider mb-4">
               {brandData.name}
             </h1>
@@ -117,12 +149,14 @@ const BrandPage = ({ params }: { params: { brandId: string } }) => {
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 ${viewMode === "grid" ? "text-accent" : ""}`}
+                aria-label="Grid view"
               >
                 <Grid size={20} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-2 ${viewMode === "list" ? "text-accent" : ""}`}
+                aria-label="List view"
               >
                 <List size={20} />
               </button>
@@ -138,7 +172,7 @@ const BrandPage = ({ params }: { params: { brandId: string } }) => {
               : "grid-cols-1"
           } gap-8`}
         >
-          {filteredProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0 }}
@@ -149,18 +183,19 @@ const BrandPage = ({ params }: { params: { brandId: string } }) => {
             >
               <div
                 className={`relative overflow-hidden rounded-lg bg-surface-dark ${
-                  viewMode === "list" ? "w-48" : "w-full"
+                  viewMode === "list" ? "w-48 h-48" : "w-full aspect-[3/4]"
                 }`}
               >
-                <div className={viewMode === "list" ? "" : "aspect-[3/4]"}>
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <button className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <button
+                  className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+                  aria-label="Add to favorites"
+                >
                   <Heart size={16} />
                 </button>
               </div>
