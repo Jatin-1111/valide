@@ -415,7 +415,9 @@ const Dropdown = ({ href, label, isActive, subItems }: DropdownProps) => {
                     <Link
                       href={`${href}/${subItem
                         .toLowerCase()
-                        .replace(" ", "-")}`}
+                        .replace(" ", "-")
+                        .replace(" ", "-")
+                        .replace(".", " ")}`}
                       className="block text-primary hover:text-accent transition-colors"
                     >
                       {subItem}

@@ -18,7 +18,7 @@ interface Product {
   image?: string;
 }
 
-const LVpage = () => {
+const CartierPage = () => {
   // State
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,12 +27,12 @@ const LVpage = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter for Louis Vuitton products
+  // Filter for Tiffany products
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/products/brand/Louis%20Vuitton"
+        "http://localhost:5000/api/products/brand/cartier"
       );
 
       if (!response.ok) {
@@ -104,39 +104,41 @@ const LVpage = () => {
       <div className="relative h-[60vh] min-h-[400px] w-full">
         <div className="absolute inset-0">
           <Image
-            src="/lv-bg.webp" // Add your LV background image
-            alt="Louis Vuitton"
+            src="/cartier-bg.webp"
+            alt="Cartier"
             fill
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/20" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <div className="relative w-36 h-36 mx-auto mb-6">
               <Image
-                src="/lv-logo.png" // Add your LV logo
-                alt="Louis Vuitton logo"
+                src="/cartier-logo.png"
+                alt="Cartier"
                 fill
                 className="rounded-md bg-white/10 backdrop-blur-sm object-contain"
               />
             </div>
             <h1 className="text-5xl font-playfair tracking-wider mb-4">
-              Louis Vuitton
+              Cartier
             </h1>
             <p className="font-lato max-w-2xl mx-auto px-4">
-              Founded in 1854, Louis Vuitton is a French luxury fashion house
-              and luxury goods company.
+              Since 1847, Cartier has been synonymous with exceptional
+              craftsmanship, creating timeless jewelry and watches that embody
+              elegance and sophistication.
             </p>
           </div>
         </div>
       </div>
+
       {/* Header */}
       <header className="bg-surface py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-playfair text-primary text-center mb-8">
-            Louis Vuitton Collection
+            Cartier Collection
           </h1>
 
           {/* Search and Controls */}
@@ -267,4 +269,4 @@ const LVpage = () => {
   );
 };
 
-export default LVpage;
+export default CartierPage;
