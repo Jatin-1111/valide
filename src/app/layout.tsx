@@ -95,7 +95,7 @@ export default function RootLayout({
       <body className="bg-background text-primary antialiased">
         <Header />
         <LenisProviders>
-          <main className="min-h-screen pt-20">
+          <main className="min-h-screen pt-20 overflow-hidden">
             {children}
             <ToastContainer
               position="top-right"
