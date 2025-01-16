@@ -1,13 +1,40 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useRef } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, Upload, Check } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { useDropzone } from "react-dropzone";
+import { cn } from "@/lib/utils";
+
+const GridPattern = () => {
+  const columns = 41;
+  const rows = 11;
+  return (
+    <div className="flex bg-surface-dark/30 flex-shrink-0 flex-wrap justify-center items-center gap-x-px gap-y-px scale-105">
+      {Array.from({ length: rows }).map((_, row) =>
+        Array.from({ length: columns }).map((_, col) => {
+          const index = row * columns + col;
+          return (
+            <div
+              key={`${col}-${row}`}
+              className={cn(
+                "w-10 h-10 flex flex-shrink-0 rounded-[2px]",
+                index % 2 === 0
+                  ? "bg-surface"
+                  : "bg-surface shadow-[0px_0px_1px_3px_rgba(243,237,231,1)_inset]"
+              )}
+            />
+          );
+        })
+      )}
+    </div>
+  );
+};
 
 // Type definitions
 interface FormData {
@@ -91,31 +118,64 @@ const ProductForm: React.FC = () => {
     }));
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
-    if (!e.target.files) return;
+  // const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
+  //   if (!e.target.files) return;
 
-    const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      setError("Maximum 5 images allowed");
-      return;
-    }
+  //   const files = Array.from(e.target.files);
+  //   if (files.length > 5) {
+  //     setError("Maximum 5 images allowed");
+  //     return;
+  //   }
 
-    const validFiles = files.filter((file) => {
-      const isValid = file.type.startsWith("image/");
-      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-      return isValid && isValidSize;
-    });
+  //   const validFiles = files.filter((file) => {
+  //     const isValid = file.type.startsWith("image/");
+  //     const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
+  //     return isValid && isValidSize;
+  //   });
 
-    if (validFiles.length !== files.length) {
-      setError(
-        "Some files were rejected. Please ensure all files are images under 5MB."
+  //   if (validFiles.length !== files.length) {
+  //     setError(
+  //       "Some files were rejected. Please ensure all files are images under 5MB."
+  //     );
+  //   } else {
+  //     setError("");
+  //   }
+
+  //   setImages(validFiles);
+  // };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { getRootProps, isDragActive } = useDropzone({
+    multiple: true,
+    maxFiles: 5,
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg"],
+    },
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 5) {
+        setError("Maximum 5 images allowed");
+        return;
+      }
+
+      const validFiles = acceptedFiles.filter(
+        (file) => file.size <= 5 * 1024 * 1024
       );
-    } else {
-      setError("");
-    }
 
-    setImages(validFiles);
-  };
+      if (validFiles.length !== acceptedFiles.length) {
+        setError(
+          "Some files were rejected. Please ensure all files are under 5MB."
+        );
+        return;
+      }
+
+      setImages(validFiles);
+      setError("");
+    },
+    onDropRejected: () => {
+      setError("Please upload only image files under 5MB");
+    },
+  });
 
   const validateForm = (): boolean => {
     if (
@@ -231,12 +291,130 @@ const ProductForm: React.FC = () => {
     );
   };
 
+  const renderFileUpload = () => (
+    <div className="w-full" {...getRootProps()}>
+      <motion.div
+        onClick={() => fileInputRef.current?.click()}
+        whileHover="animate"
+        className="p-10 group/file block rounded-lg cursor-pointer w-full relative overflow-hidden border border-surface-dark"
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length > 5) {
+              setError("Maximum 5 images allowed");
+              return;
+            }
+            setImages(files);
+          }}
+        />
+        <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]">
+          <GridPattern />
+        </div>
+        <div className="flex flex-col items-center justify-center">
+          <p className="relative z-20 font-montserrat font-bold text-primary text-base">
+            Upload Images
+          </p>
+          <p className="relative z-20 font-lato text-text-secondary text-base mt-2">
+            Drag and drop up to 5 images or click to upload
+          </p>
+          <div className="relative w-full mt-10 max-w-xl mx-auto">
+            {images.length > 0 ? (
+              images.map((file, idx) => (
+                <motion.div
+                  key={`file-${idx}`}
+                  layoutId={`file-upload-${idx}`}
+                  className="relative overflow-hidden z-40 bg-surface flex flex-col items-start justify-start md:h-24 p-4 mt-4 w-full mx-auto rounded-md border border-surface-dark"
+                >
+                  <div className="flex justify-between w-full items-center gap-4">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="text-base text-primary truncate max-w-xs font-lato"
+                    >
+                      {file.name}
+                    </motion.p>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="rounded-lg px-2 py-1 w-fit flex-shrink-0 text-sm text-text-secondary bg-surface-dark font-lato"
+                    >
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </motion.p>
+                  </div>
+                  <div className="flex text-sm md:flex-row flex-col items-start md:items-center w-full mt-2 justify-between text-text-secondary">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="px-1 py-0.5 rounded-md bg-surface-dark font-lato"
+                    >
+                      {file.type}
+                    </motion.p>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      layout
+                      className="font-lato"
+                    >
+                      modified{" "}
+                      {new Date(file.lastModified).toLocaleDateString()}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <motion.div
+                layoutId="file-upload"
+                className={cn(
+                  "relative z-40 bg-surface flex items-center justify-center h-32 mt-4 w-full max-w-[8rem] mx-auto rounded-md border border-surface-dark",
+                  "group-hover/file:border-accent transition-colors duration-300"
+                )}
+              >
+                {isDragActive ? (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-text-secondary flex flex-col items-center font-lato"
+                  >
+                    Drop files here
+                  </motion.p>
+                ) : (
+                  <svg
+                    className="h-6 w-6 text-text-secondary group-hover/file:text-accent transition-colors duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="py-20"
+      className="py-40"
     >
       <Card className="w-full max-w-2xl mx-auto bg-surface shadow-lg">
         <CardHeader className="border-b border-surface-dark">
@@ -438,37 +616,7 @@ const ProductForm: React.FC = () => {
               >
                 Product Images *
               </Label>
-              <motion.div
-                className="flex items-center justify-center w-full"
-                variants={{
-                  hover: { scale: 1.02 },
-                  initial: { scale: 1 },
-                }}
-                whileHover="hover"
-                initial="initial"
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-surface-light hover:bg-surface-dark border-surface-dark transition-colors duration-300">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-2 text-text-secondary" />
-                    <p className="mb-2 text-sm text-text-secondary font-montserrat">
-                      <span className="font-semibold">Click to upload</span> or
-                      drag and drop
-                    </p>
-                    <p className="text-xs text-text-secondary font-lato">
-                      Max 5 images (PNG, JPG, JPEG up to 5MB each)
-                    </p>
-                  </div>
-                  <Input
-                    id="images"
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                  />
-                </label>
-              </motion.div>
+              {renderFileUpload()}
               <AnimatePresence>
                 {images.length > 0 && (
                   <motion.p

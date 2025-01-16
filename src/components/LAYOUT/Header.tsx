@@ -676,7 +676,7 @@ const Header = () => {
   return (
     <>
       <header
-        className={`fixed w-full z-40 transition-all duration-300 ${
+        className={`fixed w-full z-50 transition-all duration-300 ${
           isDevelopment
             ? "bg-slate-950"
             : isScrolled
