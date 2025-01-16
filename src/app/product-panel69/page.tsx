@@ -16,6 +16,7 @@ interface FormData {
   description: string;
   price: string;
   category: string;
+  gender: string;
   stock: string;
   specifications: string;
   images: File[];
@@ -50,8 +51,8 @@ const staggeredContainer: Variants = {
 };
 
 // Styled components with motion
-const FormField = motion(Input);
-const FormTextArea = motion(Textarea);
+const FormField = motion.create(Input);
+const FormTextArea = motion.create(Textarea);
 
 const ProductForm: React.FC = () => {
   const initialFormState: FormData = {
@@ -60,6 +61,7 @@ const ProductForm: React.FC = () => {
     description: "",
     price: "",
     category: "",
+    gender: "",
     stock: "",
     specifications: "",
     images: [],
@@ -142,7 +144,7 @@ const ProductForm: React.FC = () => {
     data?: FormData;
   }
 
-  const API_URL = "http://localhost:5000/api/productForm";
+  const API_URL = "https://validebackend.onrender.com/api/productForm";
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -171,6 +173,7 @@ const ProductForm: React.FC = () => {
       formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("price", formData.price);
       formDataToSend.append("category", formData.category.trim());
+      formDataToSend.append("gender", formData.gender.toLowerCase().trim());
       formDataToSend.append("stock", formData.stock);
       formDataToSend.append(
         "specification",
@@ -365,23 +368,47 @@ const ProductForm: React.FC = () => {
             </motion.div>
 
             {/* Category Field */}
-            <motion.div variants={fadeInUp} className="space-y-2">
-              <Label
-                htmlFor="category"
-                className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
-              >
-                Category *
-              </Label>
-              {renderFormField({
-                id: "category",
-                name: "category",
-                value: formData.category,
-                onChange: handleInputChange,
-                placeholder: "Enter product category",
-                className:
-                  "border-surface-dark focus:border-accent focus:ring-accent bg-surface-light font-lato text-base",
-                required: true,
-              })}
+            <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-4">
+              <motion.div variants={fadeInUp} className="space-y-2">
+                <Label
+                  htmlFor="category"
+                  className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
+                >
+                  Category *
+                </Label>
+                {renderFormField({
+                  id: "category",
+                  name: "category",
+                  value: formData.category,
+                  onChange: handleInputChange,
+                  placeholder: "Enter product category",
+                  className:
+                    "border-surface-dark focus:border-accent focus:ring-accent bg-surface-light font-lato text-base",
+                  required: true,
+                })}
+              </motion.div>
+              <motion.div variants={fadeInUp} className="space-y-2">
+                <Label
+                  htmlFor="gender"
+                  className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
+                >
+                  Gender Category *
+                </Label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded border-surface-dark focus:border-accent focus:ring-accent bg-surface-light font-lato text-base"
+                >
+                  <option value="">Select the Gender</option>
+                  {["Men", "Women"].map((gender, index) => (
+                    <option key={index} value={gender}>
+                      {gender}
+                    </option>
+                  ))}
+                </select>
+              </motion.div>
             </motion.div>
 
             {/* Specifications Field */}
