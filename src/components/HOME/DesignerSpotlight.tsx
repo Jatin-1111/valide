@@ -65,7 +65,7 @@ const DesignerSpotlight = () => {
   };
 
   return (
-    <section className="bg-surface-DEFAULT py-20 px-6 sm:px-12 lg:px-20">
+    <section className="bg-surface-DEFAULT py-20 px-0 sm:px-12 lg:px-20">
       <div className="max-w-screen-xl mx-auto">
         {/* Section Header */}
         <div className="flex justify-between items-end mb-16">

@@ -13,14 +13,14 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-background w-full overflow-hidden min-h-screen">
+    <section className="relative bg-background w-full overflow-hidden min-h-screen ">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0 opacity-10 w-full h-full">
+      <div className="absolute inset-0 z-0 opacity-10 h-full">
         <Image
           src="/herobg.webp"
           alt="Luxury fashion background"
           fill
-          className="object-cover w-full"
+          className="object-cover"
           priority
         />
       </div>

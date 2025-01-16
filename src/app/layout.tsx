@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Montserrat, Lato } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
+import Header from "@/components/LAYOUT/Header";
 import LenisProviders from "@/components/Lenisproviders";
-import Footer from "@/components/Footer";
+import Footer from "@/components/LAYOUT/Footer";
 import { ToastContainer } from "react-toastify";
 
 // Playfair Display for headlines and luxury elements
@@ -95,7 +95,7 @@ export default function RootLayout({
       <body className="bg-background text-primary antialiased">
         <Header />
         <LenisProviders>
-          <main className="min-h-screen pt-20 overflow-hidden">
+          <main className="min-h-screen">
             {children}
             <ToastContainer
               position="top-right"

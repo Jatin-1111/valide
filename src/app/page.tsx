@@ -1,8 +1,8 @@
-import DesignerSpotlight from "@/components/DesignerSpotlight";
-import FeaturedCategories from "@/components/Featured-Categories";
-import HeroSection from "@/components/HeroSection";
-import NewArrivals from "@/components/NewArrivals";
-import TrendingProducts from "@/components/TrendingProducts";
+import DesignerSpotlight from "@/components/HOME/DesignerSpotlight";
+import FeaturedCategories from "@/components/HOME/Featured-Categories";
+import HeroSection from "@/components/HOME/HeroSection";
+import NewArrivals from "@/components/HOME/NewArrivals";
+import TrendingProducts from "@/components/HOME/TrendingProducts";
 // import Image from "next/image";
 
 interface Product {
@@ -59,7 +59,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="overflow-hidden">
+    <div className="pt-20">
       <HeroSection />
       <FeaturedCategories />
       <NewArrivals products={exampleProducts} />
