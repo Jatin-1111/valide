@@ -525,7 +525,7 @@ const ProductForm: React.FC = () => {
                   htmlFor="gender"
                   className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
                 >
-                  Gender Category <span className="text-red-500">*</span>
+                  Category <span className="text-red-500">*</span>
                 </Label>
                 <select
                   id="category"

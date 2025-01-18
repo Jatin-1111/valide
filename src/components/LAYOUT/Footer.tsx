@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -180,22 +180,32 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center justify-between">
             {/* Payment Methods */}
             <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-              {["visa", "mastercard", "amex", "paypal"].map((payment) => (
+              {[
+                { name: "visa", width: 48, height: 32 },
+                { name: "mastercard", width: 48, height: 32 },
+                { name: "amex", width: 48, height: 32 },
+                { name: "paypal", width: 48, height: 32 },
+              ].map((payment) => (
                 <div
-                  key={payment}
+                  key={payment.name}
                   className="bg-surface-light/5 p-2 rounded-lg w-14 sm:w-16 h-8 flex items-center justify-center"
                 >
-                  <Image
-                    src={`/${payment}.svg`}
-                    alt={payment}
-                    width={36}
-                    height={24}
-                    className="object-contain"
-                  />
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={`/${payment.name}.svg`}
+                      alt={`${payment.name} payment method`}
+                      width={payment.width}
+                      height={payment.height}
+                      className="object-contain"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                      }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
-
             {/* Copyright */}
             <p className="text-xs sm:text-sm text-surface-light/60 text-center sm:text-right">
               © {new Date().getFullYear()} VALIDÉ. All rights reserved.
