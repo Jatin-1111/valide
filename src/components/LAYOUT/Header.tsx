@@ -3,14 +3,21 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ChevronRight,
+  Gift,
   Heart,
   LogIn,
   LogOut,
+  Mail,
+  MapPin,
   Menu,
   Package,
+  Phone,
   Search,
   Settings,
   ShoppingBag,
+  Sparkles,
+  Tag,
   User,
   X,
 } from "lucide-react";
@@ -21,9 +28,13 @@ interface MobileMenuProps {
   onClose: () => void;
 }
 
-const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
-  const pathname = usePathname();
+interface ShopCategory {
+  label: string;
+  href: string;
+  subcategories?: string[];
+}
 
+const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   const menuVariants = {
     closed: {
       x: "-100%",
@@ -43,27 +54,38 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
     },
   };
 
-  const navItems = [
+  const shopCategories: ShopCategory[] = [
     {
-      href: "/designers",
       label: "Designers",
+      href: "/designers",
+      subcategories: [
+        "Louis Vuitton",
+        "Prada",
+        "Gucci",
+        "Cartier",
+        "Tiffany & Co.",
+      ],
     },
     {
-      href: "/new-arrivals",
-      label: "New Arrivals",
-    },
-    {
-      href: "/men",
       label: "Men",
+      href: "/men",
     },
     {
-      href: "/women",
       label: "Women",
+      href: "/women",
     },
-    {
-      href: "/sale",
-      label: "Sale",
-    },
+  ];
+
+  const quickLinks = [
+    { href: "/new-arrivals", label: "New Arrivals", icon: Sparkles },
+    { href: "/sale", label: "Sale", icon: Tag },
+    { href: "/gifts", label: "Gift Cards", icon: Gift },
+  ];
+
+  const accountLinks = [
+    { href: "/account", label: "My Account", icon: User },
+    { href: "/orders", label: "My Orders", icon: ShoppingBag },
+    { href: "/wishlist", label: "Wishlist", icon: Heart },
   ];
 
   return (
@@ -74,57 +96,172 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/25 z-50 lg:hidden"
+            className="fixed inset-0 bg-black/25 z-50 lg:hidden backdrop-blur-sm"
             onClick={onClose}
           />
 
           <motion.div
-            className="fixed inset-y-0 left-0 w-full max-w-xs bg-background p-6 z-50 lg:hidden"
+            className="fixed inset-y-0 left-0 w-full max-w-xs bg-background z-50 lg:hidden overflow-y-auto"
             variants={menuVariants}
             initial="closed"
             animate="open"
             exit="closed"
           >
-            <div className="flex items-center justify-between mb-8">
-              <motion.h2
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xl font-serif"
+            {/* Header */}
+            <div className="sticky top-0 bg-background p-4 border-b border-surface-dark">
+              <div className="flex items-center justify-between">
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xl font-playfair text-primary"
+                >
+                  Menu
+                </motion.h2>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onClose}
+                  className="p-2 hover:bg-surface-dark rounded-md text-primary"
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
+
+              {/* Search Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4"
               >
-                Menu
-              </motion.h2>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onClose}
-                className="p-2 hover:bg-surface-dark rounded-md"
-              >
-                <X size={24} />
-              </motion.button>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    className="w-full bg-surface px-4 py-2 pr-10 rounded-md border border-surface-dark focus:border-accent focus:outline-none text-primary"
+                  />
+                  <Search
+                    className="absolute right-3 top-2.5 text-text-secondary"
+                    size={20}
+                  />
+                </div>
+              </motion.div>
             </div>
 
-            <nav className="space-y-6">
-              {navItems.map((item, i) => (
-                <motion.div
-                  key={item.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <Link
-                    href={item.href}
-                    className={`block text-lg transition-colors ${
-                      pathname === item.href
-                        ? "text-accent font-medium"
-                        : "text-primary hover:text-accent"
-                    }`}
-                    onClick={onClose}
+            {/* Main Navigation */}
+            <div className="p-4 space-y-6">
+              {/* Quick Links */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-3"
+              >
+                {quickLinks.map((item, i) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
                   >
-                    {item.label}
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
+                    <Link
+                      href={item.href}
+                      className="flex items-center space-x-3 p-2 rounded-md hover:bg-surface-dark"
+                      onClick={onClose}
+                    >
+                      <item.icon size={20} className="text-accent" />
+                      <span className="text-primary font-medium">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Shop Categories */}
+              <div className="space-y-4">
+                <h3 className="text-text-secondary font-medium px-2">
+                  Shop Categories
+                </h3>
+                {shopCategories.map((category, i) => (
+                  <motion.div
+                    key={category.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (i + 3) * 0.1 }}
+                    className="space-y-2"
+                  >
+                    <Link
+                      href={category.href}
+                      className="flex items-center justify-between p-2 rounded-md hover:bg-surface-dark"
+                      onClick={onClose}
+                    >
+                      <span className="text-primary">{category.label}</span>
+                      <ChevronRight size={20} className="text-text-secondary" />
+                    </Link>
+                    {category.subcategories && (
+                      <div className="pl-4 space-y-1">
+                        {category.subcategories.map((subcategory) => (
+                          <Link
+                            key={subcategory}
+                            href={`${
+                              category.href
+                            }/${subcategory.toLowerCase()}`}
+                            className="block p-2 text-text-secondary hover:text-accent text-sm"
+                            onClick={onClose}
+                          >
+                            {subcategory}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Account Section */}
+              <div className="space-y-4">
+                <h3 className="text-text-secondary font-medium px-2">
+                  Account
+                </h3>
+                {accountLinks.map((item, i) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (i + 6) * 0.1 }}
+                  >
+                    <Link
+                      href={item.href}
+                      className="flex items-center space-x-3 p-2 rounded-md hover:bg-surface-dark"
+                      onClick={onClose}
+                    >
+                      <item.icon size={20} className="text-accent" />
+                      <span className="text-primary">{item.label}</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Contact Information */}
+              <div className="space-y-4 border-t border-surface-dark pt-4">
+                <h3 className="text-text-secondary font-medium px-2">
+                  Contact Us
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-2 text-text-secondary">
+                    <Phone size={20} />
+                    <span>+1 (555) 123-4567</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-2 text-text-secondary">
+                    <Mail size={20} />
+                    <span>support@store.com</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-2 text-text-secondary">
+                    <MapPin size={20} />
+                    <span>123 Fashion Street, NY</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </>
       )}
@@ -642,26 +779,10 @@ const Header = () => {
     {
       href: "/men",
       label: "Men",
-      subItems: [
-        "Clothing",
-        "Shoes",
-        "Bags",
-        "Accessories",
-        "Watches",
-        "Jewelry",
-      ],
     },
     {
       href: "/women",
       label: "Women",
-      subItems: [
-        "Clothing",
-        "Shoes",
-        "Bags",
-        "Accessories",
-        "Watches",
-        "Jewelry",
-      ],
     },
     {
       href: "/sale",
@@ -717,7 +838,7 @@ const Header = () => {
             </div>
 
             {/* Main Navigation */}
-            <nav className="hidden lg:flex flex-1 justify-center space-x-8">
+            <nav className="hidden md:flex md:justify-end lg:justify-center lg:flex-1 space-x-4 lg:space-x-8">
               {navItems.map((item) => (
                 <Dropdown
                   key={item.href}
@@ -730,7 +851,7 @@ const Header = () => {
             </nav>
 
             {/* Right side icons */}
-            <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-3 lg:space-x-4">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}

@@ -15,7 +15,7 @@ interface Product {
   category: string;
   stock: number;
   specification?: string;
-  image?: string;
+  images: string[];
 }
 
 const LVpage = () => {
@@ -32,7 +32,7 @@ const LVpage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://validebackend.onrender.com/api/products/brand/Louis%20Vuitton"
+        "http://localhost:5000/api/products/brand/Louis%20Vuitton"
       );
 
       if (!response.ok) {
@@ -215,7 +215,11 @@ const LVpage = () => {
                 }`}
               >
                 <Image
-                  src={product.image || "/api/placeholder/300/400"}
+                  src={
+                    Array.isArray(product.images) && product.images.length > 0
+                      ? product.images[0]
+                      : "/api/placeholder/300/400"
+                  }
                   alt={product.productName}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"

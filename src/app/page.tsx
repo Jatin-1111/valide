@@ -59,7 +59,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="pt-20">
+    <div className="overflow-x-hidden">
       <HeroSection />
       <FeaturedCategories />
       <NewArrivals products={exampleProducts} />

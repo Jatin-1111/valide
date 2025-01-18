@@ -92,7 +92,7 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${montserrat.variable} ${lato.variable}`}
     >
-      <body className="bg-background text-primary antialiased">
+      <body className="bg-background text-primary antialiased overflow-x-hidden">
         <Header />
         <LenisProviders>
           <main className="min-h-screen">

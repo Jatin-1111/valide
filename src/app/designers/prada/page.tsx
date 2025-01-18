@@ -15,7 +15,7 @@ interface Product {
   category: string;
   stock: number;
   specification?: string;
-  image?: string;
+  images: string[];
 }
 
 const PradaPage = () => {
@@ -217,7 +217,11 @@ const PradaPage = () => {
                 }`}
               >
                 <Image
-                  src={product.image || "/api/placeholder/300/400"}
+                  src={
+                    Array.isArray(product.images) && product.images.length > 0
+                      ? product.images[0]
+                      : "/api/placeholder/300/400"
+                  }
                   alt={product.productName}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"

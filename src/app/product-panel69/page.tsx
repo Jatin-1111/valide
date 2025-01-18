@@ -118,32 +118,6 @@ const ProductForm: React.FC = () => {
     }));
   };
 
-  // const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
-  //   if (!e.target.files) return;
-
-  //   const files = Array.from(e.target.files);
-  //   if (files.length > 5) {
-  //     setError("Maximum 5 images allowed");
-  //     return;
-  //   }
-
-  //   const validFiles = files.filter((file) => {
-  //     const isValid = file.type.startsWith("image/");
-  //     const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-  //     return isValid && isValidSize;
-  //   });
-
-  //   if (validFiles.length !== files.length) {
-  //     setError(
-  //       "Some files were rejected. Please ensure all files are images under 5MB."
-  //     );
-  //   } else {
-  //     setError("");
-  //   }
-
-  //   setImages(validFiles);
-  // };
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { getRootProps, isDragActive } = useDropzone({
@@ -183,7 +157,9 @@ const ProductForm: React.FC = () => {
       !formData.productName ||
       !formData.price ||
       !formData.category ||
-      !formData.stock
+      !formData.stock ||
+      !formData.description ||
+      !formData.gender
     ) {
       setError("Please fill in all required fields");
       return false;
@@ -225,10 +201,7 @@ const ProductForm: React.FC = () => {
       const formDataToSend = new FormData();
 
       // Append form fields
-      formDataToSend.append(
-        "brandName",
-        formData.brandName.toLowerCase().trim()
-      );
+      formDataToSend.append("brandName", formData.brandName.trim());
       formDataToSend.append("productName", formData.productName.trim());
       formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("price", formData.price);
@@ -442,7 +415,7 @@ const ProductForm: React.FC = () => {
                 htmlFor="brandName"
                 className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
               >
-                Brand Name *
+                Brand Name <span className="text-red-500">*</span>
               </Label>
               <select
                 id="brandName"
@@ -466,7 +439,7 @@ const ProductForm: React.FC = () => {
                 htmlFor="productName"
                 className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
               >
-                Product Name *
+                Product Name <span className="text-red-500">*</span>
               </Label>
               {renderFormField({
                 id: "productName",
@@ -486,7 +459,7 @@ const ProductForm: React.FC = () => {
                 htmlFor="description"
                 className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
               >
-                Description
+                Description <span className="text-red-500">*</span>
               </Label>
               {renderFormField({
                 id: "description",
@@ -506,7 +479,7 @@ const ProductForm: React.FC = () => {
                   htmlFor="price"
                   className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
                 >
-                  Price *
+                  Price <span className="text-red-500">*</span>
                 </Label>
                 {renderFormField({
                   id: "price",
@@ -528,7 +501,7 @@ const ProductForm: React.FC = () => {
                   htmlFor="stock"
                   className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
                 >
-                  Stock *
+                  Stock <span className="text-red-500">*</span>
                 </Label>
                 {renderFormField({
                   id: "stock",
@@ -549,28 +522,39 @@ const ProductForm: React.FC = () => {
             <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-4">
               <motion.div variants={fadeInUp} className="space-y-2">
                 <Label
-                  htmlFor="category"
+                  htmlFor="gender"
                   className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
                 >
-                  Category *
+                  Gender Category <span className="text-red-500">*</span>
                 </Label>
-                {renderFormField({
-                  id: "category",
-                  name: "category",
-                  value: formData.category,
-                  onChange: handleInputChange,
-                  placeholder: "Enter product category",
-                  className:
-                    "border-surface-dark focus:border-accent focus:ring-accent bg-surface-light font-lato text-base",
-                  required: true,
-                })}
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded border-surface-dark focus:border-accent focus:ring-accent bg-surface-light font-lato text-base"
+                >
+                  <option value="">Select the Category</option>
+                  {[
+                    "Clothing",
+                    "Shoes",
+                    "Bags",
+                    "Accessories",
+                    "Watches",
+                    "Jewelry",
+                  ].map((category, index) => (
+                    <option key={index} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </motion.div>
               <motion.div variants={fadeInUp} className="space-y-2">
                 <Label
                   htmlFor="gender"
                   className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
                 >
-                  Gender Category *
+                  Gender Category <span className="text-red-500">*</span>
                 </Label>
                 <select
                   id="gender"
@@ -614,7 +598,7 @@ const ProductForm: React.FC = () => {
                 htmlFor="images"
                 className="text-text-primary font-montserrat font-medium tracking-wide text-sm"
               >
-                Product Images *
+                Product Images <span className="text-red-500">*</span>
               </Label>
               {renderFileUpload()}
               <AnimatePresence>

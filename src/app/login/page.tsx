@@ -140,20 +140,34 @@ const AuthPage: React.FC = () => {
           }),
         });
 
-        const data = await response.json();
+        const responseData = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.message || "Authentication failed");
+        if (!response.ok || !responseData.success) {
+          throw new Error(responseData.message || "Authentication failed");
         }
 
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          toast.success(
-            isLogin ? "Welcome back!" : "Account created successfully!"
-          );
-          router.push("/");
-          setTimeout(() => window.location.reload(), 100);
-        }
+        // Store token
+        localStorage.setItem("token", responseData.token);
+
+        // Prepare user data object from the nested data
+        const userData = {
+          username: responseData.data.username || formData.name?.trim() || "",
+          email: responseData.data.email || formData.email.trim() || "",
+          phone:
+            responseData.data.phone ||
+            formData.mobile?.replace(/\D/g, "") ||
+            "",
+          _id: responseData.data._id || responseData.userId || "",
+        };
+
+        // Store user data
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        toast.success(
+          isLogin ? "Welcome back!" : "Account created successfully!"
+        );
+
+        router.push("/");
       } catch (error) {
         console.error("Authentication error:", error);
         const errorMessage =
@@ -166,7 +180,7 @@ const AuthPage: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [formData, isLogin, router]
+    [formData, isLogin, router, validateForm]
   );
 
   // Memoized input change handler
@@ -286,7 +300,7 @@ const AuthPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <motion.h2 className="font-playfair text-4xl md:text-5xl text-primary mb-4 relative">
+                    <motion.h2 className="font-playfair text-3xl md:text-5xl text-primary mb-4 relative">
                       VALIDÉ
                       <span className="absolute -top-1 -right-1 w-full h-full bg-accent/10 blur-sm z-[-1]" />
                     </motion.h2>
