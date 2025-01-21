@@ -32,7 +32,7 @@ const MensPage = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://validebackend.onrender.com/api/products/category/mens"
+        "https://validebackend.onrender.com/api/products/category/men"
       );
 
       if (!response.ok) {
