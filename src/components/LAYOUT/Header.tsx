@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../AuthProvider";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -279,77 +280,10 @@ interface MenuItem {
 
 const ProfileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  // const router = useRouter();
-
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          setIsLoggedIn(false);
-          return;
-        }
-
-        const response = await fetch(
-          "https://validebackend.onrender.com/api/check-auth",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-          localStorage.removeItem("token"); // Clear invalid token
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        setIsLoggedIn(false);
-        localStorage.removeItem("token");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthStatus();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "https://validebackend.onrender.com/api/logout",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        localStorage.removeItem("token");
-        setIsLoggedIn(false);
-        window.location.href = "/"; // This will both redirect and reload
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const { isLoggedIn, isLoading, handleLogout } = useAuth();
 
   const authenticatedMenuItems = [
     { icon: <User size={16} />, label: "My Profile", href: "/profile" },
-    { icon: <Heart size={16} />, label: "Wishlist", href: "/wishlist" },
     { icon: <Package size={16} />, label: "Orders", href: "/orders" },
     { icon: <Settings size={16} />, label: "Settings", href: "/settings" },
     {
@@ -805,11 +739,6 @@ const Header = () => {
             : "bg-background"
         }`}
       >
-        {/* Designer Brand Banner */}
-        {/* <div className="hidden md:block bg-primary text-background text-center py-2 text-sm">
-          New Season Collections: Gucci, Louis Vuitton, Dior & More
-        </div> */}
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Mobile menu button */}

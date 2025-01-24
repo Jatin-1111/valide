@@ -5,6 +5,7 @@ import Header from "@/components/LAYOUT/Header";
 import LenisProviders from "@/components/Lenisproviders";
 import Footer from "@/components/LAYOUT/Footer";
 import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "@/components/AuthProvider";
 
 // Playfair Display for headlines and luxury elements
 const playfair = Playfair_Display({
@@ -93,25 +94,27 @@ export default function RootLayout({
       className={`${playfair.variable} ${montserrat.variable} ${lato.variable}`}
     >
       <body className="bg-background text-primary antialiased overflow-x-hidden">
-        <Header />
-        <LenisProviders>
-          <main className="min-h-screen">
-            {children}
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-            />
-          </main>
-        </LenisProviders>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <LenisProviders>
+            <main className="min-h-screen">
+              {children}
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
+            </main>
+          </LenisProviders>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

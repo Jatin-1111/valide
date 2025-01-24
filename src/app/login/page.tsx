@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, User, Phone, Loader2, Shield } from "lucide-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 // Separate types for better maintainability
 interface Address {
@@ -171,6 +172,7 @@ const AuthPage: React.FC = () => {
   const [showAddress, setShowAddress] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const router = useRouter();
+  const { checkAuthStatus } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -202,7 +204,7 @@ const AuthPage: React.FC = () => {
       },
     },
   });
-  
+
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Memoized validation functions
@@ -300,6 +302,9 @@ const AuthPage: React.FC = () => {
         localStorage.setItem("token", responseData.token);
         localStorage.setItem("user", JSON.stringify(responseData.data));
 
+        // Call checkAuthStatus after successful login/registration
+        await checkAuthStatus();
+
         toast.success(
           isLogin ? "Welcome back!" : "Account created successfully!"
         );
@@ -316,7 +321,15 @@ const AuthPage: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [formData, isLogin, router, validateForm, showAddress, showPreferences]
+    [
+      formData,
+      isLogin,
+      router,
+      validateForm,
+      showAddress,
+      showPreferences,
+      checkAuthStatus,
+    ]
   );
 
   // Memoized input change handler
